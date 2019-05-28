@@ -161,28 +161,16 @@ void pot2_callback( int idx, int v, int up ) {
    motor2.trace( Serial );
   }
 }
-// Limits Switches Callback -------------------------
-void btn_callback(int idx, int v, int up)
-{
-  if(idx==1){    
-    motor1.trigger(motor1.EVT_OFF);
-    Serial.println("MOTOR-1->STOP"); 
-  }
-  if(idx==2){    
-    motor1.trigger(motor2.EVT_OFF);
-    Serial.println("MOTOR-2->STOP");
-  } 
-}
 
 void setup() {
   // Directional PIN ------------------------------------------
   pinMode(dirPin,OUTPUT);
-  // Limit Switches Init ----------------------------------------
-  downSwitch1.begin(downLimitPin1).onPress(btn_callback,1);
-  upSwitch1.begin(upLimitPin1).onPress(btn_callback,1);
-  
-  upSwitch2.begin(upLimitPin2).onPress(btn_callback,2);
-  downSwitch2.begin(downLimitPin2).onPress(btn_callback,2);
+  // Limit Switches Init ------------------------------------------
+  downSwitch1.begin(downLimitPin1).onPress(motor1,motor1.EVT_OFF);
+  upSwitch1.begin(upLimitPin1).onPress(motor1,motor1.EVT_OFF);
+  //---------------------------------------------------------------
+  upSwitch2.begin(upLimitPin2).onPress(motor2, motor2.EVT_OFF);
+  downSwitch2.begin(downLimitPin2).onPress(motor2, motor2.EVT_OFF);
   //--------------------------------------------------------------
   pot1.begin(potPin1,100)
       .average(avgPot1Buffer, sizeof(avgPot1Buffer))
