@@ -82,10 +82,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     Serial.println("MQTT_STOP");
     motor1.trigger(motor1.EVT_OFF);
     motor2.trigger(motor2.EVT_OFF);
-    //Stop(motor1);
-    //Stop(motor2);
-    //digitalWrite(motorPin1,LOW);
-    //digitalWrite(motorPin2,LOW);
+
     digitalWrite(dirPin,LOW);
       
   } 
@@ -172,15 +169,15 @@ void btn_callback(int idx, int v, int up)
     motor1.trigger(motor1.EVT_OFF);
     Serial.println("Down1");
   }
-  if(digitalRead(downLimitPin2)==1){ 
+  else if(digitalRead(downLimitPin2)==1){ 
     motor2.trigger(motor2.EVT_OFF);
     Serial.println("Down2");
   }
-  if(digitalRead(upLimitPin1)==1){    
+  else if(digitalRead(upLimitPin1)==1){    
     motor1.trigger(motor1.EVT_OFF);
     Serial.println("up1");
   }
-  if(digitalRead(upLimitPin2)==1){ 
+  else if(digitalRead(upLimitPin2)==1){ 
     motor2.trigger(motor2.EVT_OFF);
     Serial.println("up2");
   }
