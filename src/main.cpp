@@ -132,16 +132,6 @@ void reconnect() {
   }
 }
 
-void Stop(int motorNum)
-{
-    char s[24];  
-    sprintf(s,"Stop motor %d",motorNum);
-    Serial.println(s); 
-    motor1.trigger(motor1.EVT_OFF);
-    //digitalWrite(motorNum,LOW);
-    digitalWrite(dirPin,LOW);
-
-}
 
 void pot1_callback( int idx, int v, int up ) {
   //Serial.println(v);
