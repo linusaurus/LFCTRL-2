@@ -1,9 +1,12 @@
 /*
-Design Synthesis.net -r.young 5/28/2019
+Design Synthesis.net -r.young 6/3/2019 v1.0
 Skylight Sub-Controller [LSCTRL1 / LSCTRL2]
 Control two motors with potentiometer limits
 UP and DOWN limit switches for damage control
-
+------------------------------------------------------------
+UnitName = LSCTRL1
+Controls Motor 1-2
+------------------------------------------------------------
 */
 #include <Arduino.h>
 #include <SPI.h>
@@ -24,9 +27,12 @@ UP and DOWN limit switches for damage control
 #define potPin2   A1
 #define ledPin 9
 
-const int UpperLimit = 475;
-const int LowerLimit = 33;
-enum position {down, up, moving};
+const int UpperLimit = 450;
+const int LowerLimit = 60;
+const int UpperLimit2 = 460;
+const int LowerLimit2 = 90;
+
+int action = 0;
 // Automaton Objects ----------------------------------------
 Atm_button upSwitch1;
 Atm_button downSwitch1;
@@ -57,14 +63,14 @@ EthernetClient ethclient;
 PubSubClient client(ethclient);
 
 unsigned long previousMillis;
-unsigned long polling_interval = 100;
+unsigned long polling_interval = 1000;
 int position = 0;
 
 Atm_led motor1;
 Atm_led motor2;
 
-uint16_t avgPot1Buffer[24];
-uint16_t avgPot2Buffer[24];
+uint16_t avgPot1Buffer[16];
+uint16_t avgPot2Buffer[16];
 
 
 void callback(char* topic, byte* payload, unsigned int length) {
@@ -82,7 +88,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     Serial.println("MQTT_STOP");
     motor1.trigger(motor1.EVT_OFF);
     motor2.trigger(motor2.EVT_OFF);
-
+    action=0;
     digitalWrite(dirPin,LOW);
       
   } 
@@ -91,8 +97,10 @@ void callback(char* topic, byte* payload, unsigned int length) {
    
     Serial.println("MQTT_CLOSING");
     client.publish("STATUS", "1-CLOSING");
+    action = 1;
     motor1.trigger(motor1.EVT_ON);
     motor2.trigger(motor2.EVT_ON);
+    motor1.trace(Serial);
     digitalWrite(dirPin,LOW);
      
   } 
@@ -101,11 +109,13 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
     Serial.println("MQTT_OPEN");
     client.publish("STATUS", "1-OPENING");
+    action = 2;
     motor1.trigger(motor1.EVT_ON);
     motor2.trigger(motor2.EVT_ON);
     digitalWrite(dirPin,HIGH);
     
   }
+  
 
 }
 
@@ -131,25 +141,34 @@ void reconnect() {
     }
   }
 }
-
+ 
 
 void pot1_callback( int idx, int v, int up ) {
-  //Serial.println(v);
-  if (v < LowerLimit  || v > UpperLimit)
+ 
+  
+  if (v < LowerLimit  && action==1)
   { 
-   //Stop(motorPin1);
+  
    motor1.trigger(motor1.EVT_OFF);
-   motor1.trace( Serial);
-  }
+   client.publish("LFCTRL1", "11");
+
+   }else if(v > UpperLimit && action==2){
+     motor1.trigger(motor1.EVT_OFF);
+     client.publish("LFCTRL1", "21");
+   }
+  
 }
 void pot2_callback( int idx, int v, int up ) {
-   //Serial.println(v);
-  if (v < LowerLimit  || v > UpperLimit)
+ 
+  if (v < LowerLimit2  && action==1)
   {  
-   //Stop(motorPin2);
    motor2.trigger(motor2.EVT_OFF);
-   motor2.trace( Serial );
-  }
+    client.publish("LFCTRL1", "21");
+   }else if(v > UpperLimit2 && action==2){
+     motor2.trigger(motor2.EVT_OFF);
+     client.publish("LFCTRL1", "22");
+   }
+  
 }
 
 void setup() {
@@ -162,16 +181,16 @@ void setup() {
   upSwitch2.begin(upLimitPin2).onPress(motor2, motor2.EVT_OFF);
   downSwitch2.begin(downLimitPin2).onPress(motor2, motor2.EVT_OFF);
   //--------------------------------------------------------------
-  pot1.begin(potPin1,100)
+  pot1.begin(potPin1,50)
       .average(avgPot1Buffer, sizeof(avgPot1Buffer))
         .onChange(pot1_callback);
-  pot2.begin(potPin2,100)
+  pot2.begin(potPin2,50)
       .average(avgPot2Buffer, sizeof(avgPot2Buffer))
           .onChange(pot2_callback);
   // -------------------------------------------------------------
   // Motors Controls
   motor1.begin(motorPin1);
-  motor2.begin(motorPin2);
+  motor2.begin(motorPin2).brightness(230);// Throttle back dominant motor
 
   Serial.begin(9600);
   // print your local IP address: 
@@ -197,6 +216,11 @@ void loop() {
   // Main Utility Task Loop
   if(currentMillis - previousMillis > polling_interval) {  
     previousMillis = currentMillis;  
+    //Serial.print("M1 -");
+    //Serial.println(pot1.state());
+    //Serial.println("---------");
+    //Serial.print("M2 -");
+    //Serial.println(pot2.state());
   }
 
 
