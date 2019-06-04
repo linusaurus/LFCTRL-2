@@ -28,12 +28,12 @@
 #define potPin1   A0
 #define potPin2   A1
 
-// M1 ------------------------------
-const int UpperLimit = 410;
+// M3 ------------------------------
+const int UpperLimit = 420;
 const int LowerLimit = 35;
-// M2 -----------------------------
-const int UpperLimit2 = 425;
-const int LowerLimit2 = 50;
+// M4 -----------------------------
+const int UpperLimit2 = 730;
+const int LowerLimit2 = 215;
 //  --------------------------------
 int action = 0;
 // Automaton Objects ----------------------------------------
@@ -197,7 +197,7 @@ void setup() {
   // -------------------------------------------------------------
   // Motors Controls
   motor3.begin(motorPin1);
-  motor4.begin(motorPin2).brightness(243);// Throttle back dominant motor-Good Luck!?!
+  motor4.begin(motorPin2);// Throttle back dominant motor-Good Luck!?!
 
   Serial.begin(9600);
   // print your local IP address: 
@@ -223,11 +223,11 @@ void loop() {
   // Main Utility Task Loop
   if(currentMillis - previousMillis > polling_interval) {  
     previousMillis = currentMillis;  
-    //Serial.print("M1 -");
-    //Serial.println(pot1.state());
-    //Serial.println("---------");
-    //Serial.print("M2 -");
-    //Serial.println(pot2.state());
+    Serial.print("M3 ->");
+    Serial.println(pot1.state());
+    Serial.println("---------");
+    Serial.print("M4 ->");
+    Serial.println(pot2.state());
   }
 
 
