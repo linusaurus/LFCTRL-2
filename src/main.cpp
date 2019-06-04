@@ -1,13 +1,15 @@
-/*
-Design Synthesis.net -r.young 6/3/2019 v1.0
-Skylight Sub-Controller [LSCTRL1 / LSCTRL2]
-Control two motors with potentiometer limits
-UP and DOWN limit switches for damage control
-------------------------------------------------------------
-UnitName = LFCTRL1
-Controls Motor 1-2
-------------------------------------------------------------
-*/
+/**************************************************************
+*  Design Synthesis.net -r.young 6/3/2019 v1.0
+*  Skylight Sub-Controller [LSCTRL1 / LSCTRL2]
+*  Control two motors with potentiometer limits
+*  UP and DOWN limit switches for failsafe 
+*  damage control
+*  ------------------------------------------------------------
+*  UnitName = LFCTRL-2
+*  Controls Motor 3-4
+*  ------------------------------------------------------------
+****************************************************************/
+
 #include <Arduino.h>
 #include <SPI.h>
 #include <Ethernet.h>
@@ -25,7 +27,7 @@ Controls Motor 1-2
 
 #define potPin1   A0
 #define potPin2   A1
-#define ledPin 9
+
 // M1 ------------------------------
 const int UpperLimit = 410;
 const int LowerLimit = 35;
@@ -67,8 +69,8 @@ unsigned long previousMillis;
 unsigned long polling_interval = 1000;
 int position = 0;
 
-Atm_led motor1;
-Atm_led motor2;
+Atm_led motor3;
+Atm_led motor4;
 
 uint16_t avgPot1Buffer[16];
 uint16_t avgPot2Buffer[16];
@@ -87,8 +89,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
    if ((char)payload[0] == '0') {
    
     Serial.println("MQTT_STOP");
-    motor1.trigger(motor1.EVT_OFF);
-    motor2.trigger(motor2.EVT_OFF);
+    motor3.trigger(motor3.EVT_OFF);
+    motor4.trigger(motor4.EVT_OFF);
     action=0;
     digitalWrite(dirPin,LOW);
       
@@ -99,8 +101,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
     Serial.println("MQTT_CLOSING");
     client.publish("STATUS", "1-CLOSING");
     action = 1;
-    motor1.trigger(motor1.EVT_ON);
-    motor2.trigger(motor2.EVT_ON);
+    motor3.trigger(motor3.EVT_ON);
+    motor4.trigger(motor4.EVT_ON);
    
     digitalWrite(dirPin,LOW);
      
@@ -111,8 +113,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
     Serial.println("MQTT_OPEN");
     client.publish("STATUS", "1-OPENING");
     action = 2;
-    motor1.trigger(motor1.EVT_ON);
-    motor2.trigger(motor2.EVT_ON);
+    motor3.trigger(motor3.EVT_ON);
+    motor4.trigger(motor4.EVT_ON);
     digitalWrite(dirPin,HIGH);
     
   }
@@ -150,11 +152,11 @@ void pot1_callback( int idx, int v, int up ) {
   if (v < LowerLimit  && action==1)
   { 
   
-   motor1.trigger(motor1.EVT_OFF);
+   motor3.trigger(motor3.EVT_OFF);
    client.publish("LFCTRL1", "11");
 
    }else if(v > UpperLimit && action==2){
-     motor1.trigger(motor1.EVT_OFF);
+     motor3.trigger(motor3.EVT_OFF);
      client.publish("LFCTRL1", "21");
    }
   
@@ -163,10 +165,10 @@ void pot2_callback( int idx, int v, int up ) {
  
   if (v < LowerLimit2  && action==1)
   {  
-   motor2.trigger(motor2.EVT_OFF);
+   motor4.trigger(motor4.EVT_OFF);
     client.publish("LFCTRL1", "21");
    }else if(v > UpperLimit2 && action==2){
-     motor2.trigger(motor2.EVT_OFF);
+     motor4.trigger(motor4.EVT_OFF);
      client.publish("LFCTRL1", "22");
    }
   
@@ -176,14 +178,14 @@ void setup() {
   // Directional PIN ------------------------------------------
   pinMode(dirPin,OUTPUT);
   // Limit Switches Init ------------------------------------------
-  downSwitch1.begin(downLimitPin1).onRelease(motor1,motor1.EVT_OFF);
+  downSwitch1.begin(downLimitPin1).onRelease(motor3,motor3.EVT_OFF);
   //downSwitch1.trace(Serial);
-  upSwitch1.begin(upLimitPin1).onRelease(motor1,motor1.EVT_OFF);
+  upSwitch1.begin(upLimitPin1).onRelease(motor3,motor3.EVT_OFF);
   //upSwitch1.trace(Serial);
   //---------------------------------------------------------------
-  upSwitch2.begin(upLimitPin2).onRelease(motor2, motor2.EVT_OFF);
+  upSwitch2.begin(upLimitPin2).onRelease(motor4, motor4.EVT_OFF);
   upSwitch2.trace(Serial);
-  downSwitch2.begin(downLimitPin2).onRelease(motor2, motor2.EVT_OFF);
+  downSwitch2.begin(downLimitPin2).onRelease(motor4, motor4.EVT_OFF);
   downSwitch2.trace(Serial);
   //--------------------------------------------------------------
   pot1.begin(potPin1,50)
@@ -194,8 +196,8 @@ void setup() {
           .onChange(pot2_callback);
   // -------------------------------------------------------------
   // Motors Controls
-  motor1.begin(motorPin1);
-  motor2.begin(motorPin2).brightness(243);// Throttle back dominant motor-Good Luck!?!
+  motor3.begin(motorPin1);
+  motor4.begin(motorPin2).brightness(243);// Throttle back dominant motor-Good Luck!?!
 
   Serial.begin(9600);
   // print your local IP address: 
