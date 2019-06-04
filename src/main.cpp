@@ -4,7 +4,7 @@ Skylight Sub-Controller [LSCTRL1 / LSCTRL2]
 Control two motors with potentiometer limits
 UP and DOWN limit switches for damage control
 ------------------------------------------------------------
-UnitName = LSCTRL1
+UnitName = LFCTRL1
 Controls Motor 1-2
 ------------------------------------------------------------
 */
@@ -26,12 +26,13 @@ Controls Motor 1-2
 #define potPin1   A0
 #define potPin2   A1
 #define ledPin 9
-
-const int UpperLimit = 450;
-const int LowerLimit = 60;
-const int UpperLimit2 = 460;
-const int LowerLimit2 = 90;
-
+// M1 ------------------------------
+const int UpperLimit = 410;
+const int LowerLimit = 35;
+// M2 -----------------------------
+const int UpperLimit2 = 425;
+const int LowerLimit2 = 50;
+//  --------------------------------
 int action = 0;
 // Automaton Objects ----------------------------------------
 Atm_button upSwitch1;
@@ -100,7 +101,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
     action = 1;
     motor1.trigger(motor1.EVT_ON);
     motor2.trigger(motor2.EVT_ON);
-    motor1.trace(Serial);
+   
     digitalWrite(dirPin,LOW);
      
   } 
@@ -175,11 +176,15 @@ void setup() {
   // Directional PIN ------------------------------------------
   pinMode(dirPin,OUTPUT);
   // Limit Switches Init ------------------------------------------
-  downSwitch1.begin(downLimitPin1).onPress(motor1,motor1.EVT_OFF);
-  upSwitch1.begin(upLimitPin1).onPress(motor1,motor1.EVT_OFF);
+  downSwitch1.begin(downLimitPin1).onRelease(motor1,motor1.EVT_OFF);
+  //downSwitch1.trace(Serial);
+  upSwitch1.begin(upLimitPin1).onRelease(motor1,motor1.EVT_OFF);
+  //upSwitch1.trace(Serial);
   //---------------------------------------------------------------
-  upSwitch2.begin(upLimitPin2).onPress(motor2, motor2.EVT_OFF);
-  downSwitch2.begin(downLimitPin2).onPress(motor2, motor2.EVT_OFF);
+  upSwitch2.begin(upLimitPin2).onRelease(motor2, motor2.EVT_OFF);
+  upSwitch2.trace(Serial);
+  downSwitch2.begin(downLimitPin2).onRelease(motor2, motor2.EVT_OFF);
+  downSwitch2.trace(Serial);
   //--------------------------------------------------------------
   pot1.begin(potPin1,50)
       .average(avgPot1Buffer, sizeof(avgPot1Buffer))
@@ -190,7 +195,7 @@ void setup() {
   // -------------------------------------------------------------
   // Motors Controls
   motor1.begin(motorPin1);
-  motor2.begin(motorPin2).brightness(230);// Throttle back dominant motor
+  motor2.begin(motorPin2).brightness(243);// Throttle back dominant motor-Good Luck!?!
 
   Serial.begin(9600);
   // print your local IP address: 
