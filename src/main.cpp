@@ -29,11 +29,11 @@
 #define potPin2   A1
 
 // M3 ------------------------------
-const int UpperLimit = 420;
-const int LowerLimit = 35;
+const int UpperLimit = 520;
+const int LowerLimit = 100;
 // M4 -----------------------------
-const int UpperLimit2 = 730;
-const int LowerLimit2 = 215;
+const int UpperLimit2 = 820;
+const int LowerLimit2 = 280;
 //  --------------------------------
 int action = 0;
 // Automaton Objects ----------------------------------------
@@ -226,8 +226,8 @@ void loop() {
     Serial.print("M3 ->");
     Serial.println(pot1.state());
     Serial.println("---------");
-    Serial.print("M4 ->");
-    Serial.println(pot2.state());
+    // Serial.print("M4 ->");
+    // Serial.println(pot2.state());
   }
 
 
