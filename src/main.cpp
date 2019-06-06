@@ -49,12 +49,12 @@ Atm_analog pot2;
 Atm_controller MotorController;
 Atm_led statusLED;
 
-const char* mqtt_mqttServer = "192.198.10.22";
+
 // Enter a MAC address and IP address for your controller below.
 // The IP address will be dependent on your local network.
 // gateway and subnet are optional:
 byte mac[] = {
-  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED
+  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xE0
 };
 IPAddress ip(192, 168, 10, 169);
 IPAddress myDns(192, 168, 10, 199);
@@ -89,6 +89,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
    if ((char)payload[0] == '0') {
    
     Serial.println("MQTT_STOP");
+    client.publish("STATUS", "30");
+    client.publish("STATUS", "40");
     motor3.trigger(motor3.EVT_OFF);
     motor4.trigger(motor4.EVT_OFF);
     action=0;
@@ -99,7 +101,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
   if ((char)payload[0] == '1') {
    
     Serial.println("MQTT_CLOSING");
-    client.publish("STATUS", "1-CLOSING");
+    client.publish("STATUS", "33");
+    client.publish("STATUS", "43");
     action = 1;
     motor3.trigger(motor3.EVT_ON);
     motor4.trigger(motor4.EVT_ON);
@@ -111,7 +114,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
   if ((char)payload[0] == '2') {
 
     Serial.println("MQTT_OPEN");
-    client.publish("STATUS", "1-OPENING");
+    client.publish("STATUS", "33");
+    client.publish("STATUS", "43");
     action = 2;
     motor3.trigger(motor3.EVT_ON);
     motor4.trigger(motor4.EVT_ON);
@@ -130,8 +134,8 @@ void reconnect() {
     if (client.connect("LF2")) {
       Serial.println("connected");
       // Once connected, publish an announcement...
-      client.publish("LF2", "ONLINE");
-      
+      client.publish("STATUS", "35");
+      client.publish("STATUS", "45");
 
       // ... and resubscribe
       client.subscribe("SIGNAL");
@@ -153,11 +157,11 @@ void pot1_callback( int idx, int v, int up ) {
   { 
   
    motor3.trigger(motor3.EVT_OFF);
-   client.publish("LFCTRL1", "11");
+   client.publish("STATUS", "11");
 
    }else if(v > UpperLimit && action==2){
      motor3.trigger(motor3.EVT_OFF);
-     client.publish("LFCTRL1", "21");
+     client.publish("STATUS", "21");
    }
   
 }
@@ -166,10 +170,10 @@ void pot2_callback( int idx, int v, int up ) {
   if (v < LowerLimit2  && action==1)
   {  
    motor4.trigger(motor4.EVT_OFF);
-    client.publish("LFCTRL1", "21");
+    client.publish("STATUS", "21");
    }else if(v > UpperLimit2 && action==2){
      motor4.trigger(motor4.EVT_OFF);
-     client.publish("LFCTRL1", "22");
+     client.publish("STATUS", "22");
    }
   
 }
@@ -223,11 +227,7 @@ void loop() {
   // Main Utility Task Loop
   if(currentMillis - previousMillis > polling_interval) {  
     previousMillis = currentMillis;  
-    Serial.print("M3 ->");
-    Serial.println(pot1.state());
-    Serial.println("---------");
-    // Serial.print("M4 ->");
-    // Serial.println(pot2.state());
+    
   }
 
 
