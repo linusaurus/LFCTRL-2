@@ -29,18 +29,23 @@
 #define potPin2   A1
 
 // M3 ------------------------------
-const int UpperLimit = 520;
+const int UpperLimit = 515;
 const int LowerLimit = 100;
 // M4 -----------------------------
-const int UpperLimit2 = 820;
-const int LowerLimit2 = 280;
+const int UpperLimit2 = 825;
+const int LowerLimit2 = 278;
 //  --------------------------------
 int action = 0;
-// Automaton Objects ----------------------------------------
+// Automaton Objects ------------------------------------------------------------------------
 Atm_button upSwitch1;
 Atm_button downSwitch1;
 Atm_button upSwitch2;
 Atm_button downSwitch2;
+// State Flags ------------------------------------------------------------------------------
+bool LF3_UP{false};
+bool LF3_DOWN{false};
+bool LF4_UP{false};
+bool LF4_DOWN{false};
 
 // State Machine functions for Potentiometer--
 Atm_analog pot1;
@@ -56,7 +61,7 @@ Atm_led statusLED;
 byte mac[] = {
   0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xE0
 };
-IPAddress ip(192, 168, 10, 169);
+IPAddress ip(192, 168, 10, 162);
 IPAddress myDns(192, 168, 10, 199);
 IPAddress gateway(192, 168, 10, 199);
 IPAddress subnet(255, 255, 255, 0);
@@ -155,25 +160,51 @@ void pot1_callback( int idx, int v, int up ) {
   
   if (v < LowerLimit  && action==1)
   { 
-  
+    
    motor3.trigger(motor3.EVT_OFF);
-   client.publish("STATUS", "11");
+   if(!LF3_DOWN){
+      client.publish("STATUS", "31");
+      LF3_DOWN=true;
+      LF3_UP=false;
+   }
+  
+   //action=0;
 
    }else if(v > UpperLimit && action==2){
      motor3.trigger(motor3.EVT_OFF);
-     client.publish("STATUS", "21");
+     if(!LF3_UP){
+       client.publish("STATUS", "32");
+       LF3_UP=true;
+       LF3_DOWN=false;
+     }
+     
+     //action=0;
    }
   
 }
 void pot2_callback( int idx, int v, int up ) {
- 
+  
   if (v < LowerLimit2  && action==1)
   {  
-   motor4.trigger(motor4.EVT_OFF);
-    client.publish("STATUS", "21");
+    motor4.trigger(motor4.EVT_OFF);
+    if (!LF4_DOWN)
+    {
+      client.publish("STATUS", "41");
+      LF4_DOWN=true;
+      LF4_UP=false;
+    }
+    
+    
+    //action=0;
    }else if(v > UpperLimit2 && action==2){
      motor4.trigger(motor4.EVT_OFF);
-     client.publish("STATUS", "22");
+     if(!LF4_UP){
+       client.publish("STATUS", "42");
+       LF4_UP=true;
+       LF4_DOWN=false;
+     }
+     
+     //action=0;
    }
   
 }
@@ -183,9 +214,9 @@ void setup() {
   pinMode(dirPin,OUTPUT);
   // Limit Switches Init ------------------------------------------
   downSwitch1.begin(downLimitPin1).onRelease(motor3,motor3.EVT_OFF);
-  //downSwitch1.trace(Serial);
+  downSwitch1.trace(Serial);
   upSwitch1.begin(upLimitPin1).onRelease(motor3,motor3.EVT_OFF);
-  //upSwitch1.trace(Serial);
+   upSwitch1.trace(Serial);
   //---------------------------------------------------------------
   upSwitch2.begin(upLimitPin2).onRelease(motor4, motor4.EVT_OFF);
   upSwitch2.trace(Serial);
@@ -201,7 +232,7 @@ void setup() {
   // -------------------------------------------------------------
   // Motors Controls
   motor3.begin(motorPin1);
-  motor4.begin(motorPin2);// Throttle back dominant motor-Good Luck!?!
+  motor4.begin(motorPin2).brightness(235);// Throttle back dominant motor-Good Luck!?!
 
   Serial.begin(9600);
   // print your local IP address: 
@@ -227,6 +258,20 @@ void loop() {
   // Main Utility Task Loop
   if(currentMillis - previousMillis > polling_interval) {  
     previousMillis = currentMillis;  
+
+    Serial.print("M3 -");
+    Serial.println(pot1.state());
+    Serial.println("---------");
+    Serial.print("M4 -");
+    Serial.println(pot2.state());
+    // if (action==1 || action==2)
+    // {
+    //   char potvalue[2] ;
+    //   sprintf(potvalue,"%d",pot1.state());
+    //   client.publish("LF1", potvalue);
+    //   sprintf(potvalue,"%d",pot2.state());
+    //   client.publish("LF2", potvalue);
+    // }
     
   }
 
