@@ -153,7 +153,7 @@ void reconnect() {
       // Once connected, publish an announcement...
       client.publish("STATUS", "35");
       client.publish("STATUS", "45");
-      statusLED.blink(20,2000).trigger(statusLED.EVT_BLINK);
+      statusLED.blink(500,500).trigger(statusLED.EVT_BLINK);
       // ... and resubscribe
       client.subscribe("SIGNAL");
     } else {
@@ -357,7 +357,6 @@ void loop() {
         #endif       
         motor4.brightness(255 - (abs(err) * PUSHCORRECTION));
         motor3.brightness(255 - (abs(err) * PULLCORRECTION) );
- 
       }
       if (action==1)
       {
@@ -365,11 +364,8 @@ void loop() {
         Serial.print("Down >NEG : ");
         Serial.println("PUSH 1");
         #endif
-   
         motor4.brightness(255 - (abs(err) * PULLCORRECTION) );
         motor3.brightness(255 - (abs(err) * PUSHCORRECTION));
-
-        
       }
     }
     
