@@ -1,5 +1,5 @@
 /**************************************************************
-*  Design Synthesis.net -r.young 6/23/2019 v1.2
+*  Design Synthesis.net -r.young 7/10/2019 v1.3
 *  Skylight Sub-Controller [LSCTRL1 / LSCTRL2]
 *  Control two motors with potentiometer limits
 *  UP and DOWN limit switches for failsafe 
@@ -103,12 +103,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
     #if debug == 1
     Serial.println("MQTT_STOP");
     #endif
-    client.publish("STATUS", "30");
-    client.publish("STATUS", "40");
+
     motor3.trigger(motor3.EVT_OFF);
     motor4.trigger(motor4.EVT_OFF);
     action=0;
-    statusLED.blink(300,300).trigger(statusLED.EVT_BLINK);
+    statusLED.blink(2000,500).trigger(statusLED.EVT_BLINK);
     digitalWrite(dirPin,LOW);
       
   } 
@@ -118,12 +117,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
     #if debug ==1
     Serial.println("MQTT_CLOSING");
     #endif
-    client.publish("STATUS", "33");
-    client.publish("STATUS", "43");
+
     action = 1;
     motor3.trigger(motor3.EVT_ON);
     motor4.trigger(motor4.EVT_ON);
-    statusLED.blink(60,60).trigger(statusLED.EVT_BLINK);
+    statusLED.blink(1000,1000).trigger(statusLED.EVT_BLINK);
     digitalWrite(dirPin,LOW);
      
   } 
@@ -133,12 +131,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
     #if debug ==1
     Serial.println("MQTT_OPEN");
     #endif
-    client.publish("STATUS", "33");
-    client.publish("STATUS", "43");
+
     action = 2;
     motor3.trigger(motor3.EVT_ON);
     motor4.trigger(motor4.EVT_ON);
-    statusLED.blink(60,60).trigger(statusLED.EVT_BLINK);
+    statusLED.blink(5000,500).trigger(statusLED.EVT_BLINK);
     digitalWrite(dirPin,HIGH);
     
   }
@@ -178,7 +175,7 @@ void pot1_callback( int idx, int v, int up ) {
   { 
     
    motor3.trigger(motor3.EVT_OFF);
-   statusLED.blink(300,300).trigger(statusLED.EVT_BLINK); 
+   statusLED.blink(2000,500).trigger(statusLED.EVT_BLINK); 
    if(!LF3_DOWN){
       client.publish("STATUS", "31");
       LF3_DOWN=true;
@@ -189,7 +186,7 @@ void pot1_callback( int idx, int v, int up ) {
 
    }else if(v > UpperLimit && action==2){
      motor3.trigger(motor3.EVT_OFF);
-     statusLED.blink(300,300).trigger(statusLED.EVT_BLINK); 
+     statusLED.blink(2000,500).trigger(statusLED.EVT_BLINK); 
      if(!LF3_UP){
        client.publish("STATUS", "32");
        LF3_UP=true;
@@ -205,7 +202,7 @@ void pot2_callback( int idx, int v, int up ) {
   if (v < LowerLimit2  && action==1)
   {  
     motor4.trigger(motor4.EVT_OFF);
-    statusLED.blink(300,300).trigger(statusLED.EVT_BLINK); 
+    statusLED.blink(2000,500).trigger(statusLED.EVT_BLINK); 
     if (!LF4_DOWN)
     {
       client.publish("STATUS", "41");
@@ -215,7 +212,7 @@ void pot2_callback( int idx, int v, int up ) {
       
    }else if(v > UpperLimit2 && action==2){
      motor4.trigger(motor4.EVT_OFF);
-     statusLED.blink(300,300).trigger(statusLED.EVT_BLINK); 
+     statusLED.blink(2000,500).trigger(statusLED.EVT_BLINK); 
      if(!LF4_UP){
        client.publish("STATUS", "42");
        LF4_UP=true;
@@ -233,15 +230,13 @@ void button_change( int idx, int v, int up ) {
   {
     motor3.trigger( motor3.EVT_OFF );  
     motor4.trigger( motor4.EVT_OFF);  
-    client.publish("STATUS", "44");
-    client.publish("STATUS", "34");
+
   }
   if (pot2.state()< (LowerLimit - 2) || pot2.state() > (UpperLimit + 2))
   {
     motor3.trigger( motor3.EVT_OFF );  
     motor4.trigger( motor4.EVT_OFF);  
-    client.publish("STATUS", "44");
-    client.publish("STATUS", "34");
+
   }
   
  
