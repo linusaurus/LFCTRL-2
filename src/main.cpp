@@ -30,17 +30,17 @@
 #define potPin2   A1
 #define ledPin    A3 // Status All In One LED
 // Debugging Flags
-#define debug     0
+#define debug     1
 #define mqtt      1
 #define switches  1
 
 
 // M3 ------------------------------
-const int UpperLimit = 405;
-const int LowerLimit = 65;
+const int UpperLimit = 385;
+const int LowerLimit = 55;
 // M4 -----------------------------
-const int UpperLimit2 = 405;
-const int LowerLimit2 = 65;
+const int UpperLimit2 = 420;
+const int LowerLimit2 = 90;
 //  --------------------------------
 int action = 0;
 // Automaton Objects ------------------------------------------------------------------------
